@@ -11,7 +11,7 @@ const Home = () => {
     { name: 'Features', url: '#features', icon: Star },
     { name: 'About Us', url: '#about', icon: Info },
     { name: 'Sign In', url: '/sign-in', icon: LogIn, isButton: true, variant: 'signin' as const },
-    { name: 'Sign Up', url: '#', icon: UserPlus, isButton: true, variant: 'signup' as const }
+    { name: 'Sign Up', url: '/sign-up', icon: UserPlus, isButton: true, variant: 'signup' as const }
   ];
 
   return (
