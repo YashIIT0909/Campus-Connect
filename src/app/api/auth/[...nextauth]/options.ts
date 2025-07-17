@@ -42,12 +42,6 @@ const authOptions: NextAuthOptions = {
                         throw new Error("Invalid email or password");
                     }
 
-                    // If you have an isVerified field, uncomment this
-                    // if (!user.isVerified) {
-                    //     console.error("User is not verified");
-                    //     throw new Error("Please verify your email before logging in");
-                    // }
-
                     // Skip password check for Google users
                     if (user.password) {
                         const isPasswordCorrect = await bcrypt.compare(
@@ -80,23 +74,39 @@ const authOptions: NextAuthOptions = {
 
     ],
     callbacks: {
-        async signIn({ user, account, profile }) {
-            if (account?.provider === "google" && user?.email) {
+        async signIn({ user, account }) {
+            if (account?.provider === "google") {
                 await dbConnect();
+
+                // Check if user exists in our DB
                 let dbUser = await UserModel.findOne({ email: user.email });
+
                 if (!dbUser) {
-                    // Create a new user with Google info (fill required fields as needed)
-                    dbUser = await UserModel.create({
-                        username: user.name || user.email.split('@')[0],
-                        email: user.email,
-                        password: "", // Google users don't need a password
-                        AdmissionNumber: "", // You may want to collect this later
-                        Hostel: "", // You may want to collect this later
-                        LostOrFound: []
-                    });
+                    try {
+                        // Create temp user with placeholder values
+                        dbUser = await UserModel.create({
+                            username: user.name?.replace(/\s+/g, '') || user.email?.split('@')[0],
+                            email: user.email,
+                            // Use placeholder values for required fields
+                            password: await bcrypt.hash(Math.random().toString(36), 10),
+                            AdmissionNumber: "PENDING",
+                            Hostel: "Aquamarine", // Default value, will update later
+                            needsProfileCompletion: true // Add this field to your schema
+                        });
+                    } catch (error) {
+                        console.error("Error creating user:", error);
+                        return false;
+                    }
                 }
+
+                if (dbUser.needsProfileCompletion) {
+                    return `/complete-profile?email=${encodeURIComponent(user.email ?? "")}`;
+                }
+
+                return true;
             }
-            return true; // Allow sign in
+            // Explicitly return false for non-google providers or if no return above
+            return false;
         },
 
         async jwt({ token, user }) {

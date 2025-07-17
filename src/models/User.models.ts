@@ -8,6 +8,7 @@ export interface IUser extends Document {
     AdmissionNumber: string;
     Hostel: string;
     LostOrFound: ILostOrFoundItem[];
+    needsProfileCompletion?: boolean;
 
 }
 
@@ -28,9 +29,20 @@ const UserSchema: Schema<IUser> = new Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    AdmissionNumber: { type: String, required: true, unique: true },
-    Hostel: { type: String, required: true, enum: hostelList },
-    LostOrFound: { type: [LostOrFoundItemSchema], default: [] }
+    AdmissionNumber: {
+        type: String, required: function () {
+            // Not required for users who need to complete profile
+            return !this.needsProfileCompletion;
+        }, unique: true
+    },
+    Hostel: {
+        type: String, required: function () {
+            // Not required for users who need to complete profile
+            return !this.needsProfileCompletion;
+        }, enum: hostelList
+    },
+    LostOrFound: { type: [LostOrFoundItemSchema], default: [] },
+    needsProfileCompletion: { type: Boolean, default: false }
 });
 
 const UserModel = mongoose.models.User as mongoose.Model<IUser> || mongoose.model<IUser>('User', UserSchema);
