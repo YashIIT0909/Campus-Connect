@@ -14,6 +14,8 @@ import {
     Menu,
     X
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { LimelightNav, NavItem } from '@/components/ui/limelight-nav';
 
 interface SidebarProps {
     activeTab: string;
@@ -36,6 +38,94 @@ const generalItems = [
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }: SidebarProps) {
+    const [isMobile, setIsMobile] = useState(false);
+    const [activeMobileTabIndex, setActiveMobileTabIndex] = useState(0);
+
+    // Create NavItem array for LimelightNav
+    const mobileNavItems: NavItem[] = [
+        {
+            id: 'personal',
+            icon: <LayoutDashboard />,
+            label: 'Dashboard',
+            onClick: () => setActiveTab('personal')
+        },
+        {
+            id: 'all-items',
+            icon: <Search />,
+            label: 'All Items',
+            onClick: () => setActiveTab('all-items')
+        },
+        {
+            id: 'my-posts',
+            icon: <FileText />,
+            label: 'My Posts',
+            onClick: () => setActiveTab('my-posts')
+        },
+        {
+            id: 'analytics',
+            icon: <BarChart3 />,
+            label: 'Analytics',
+            onClick: () => setActiveTab('analytics')
+        },
+        {
+            id: 'settings',
+            icon: <Settings />,
+            label: 'Settings',
+            onClick: () => setActiveTab('settings')
+        }
+    ];
+
+    // Find the index of the active tab in mobile nav items
+    useEffect(() => {
+        const index = mobileNavItems.findIndex(item => item.id === activeTab);
+        if (index !== -1) {
+            setActiveMobileTabIndex(index);
+        }
+    }, [activeTab]);
+
+    // Check if screen is mobile
+    useEffect(() => {
+        const checkIfMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+            if (window.innerWidth < 768 && !collapsed) {
+                setCollapsed(true);
+            }
+        };
+
+        // Initial check
+        checkIfMobile();
+
+        // Add event listener
+        window.addEventListener('resize', checkIfMobile);
+
+        // Cleanup
+        return () => window.removeEventListener('resize', checkIfMobile);
+    }, [collapsed, setCollapsed]);
+
+    // Handle tab change from LimelightNav
+    const handleMobileTabChange = (index: number) => {
+        setActiveMobileTabIndex(index);
+        setActiveTab(mobileNavItems[index].id as string);
+    };
+
+    // Show the mobile dock nav bar
+    if (isMobile) {
+        return (
+            <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
+                <LimelightNav
+                    items={mobileNavItems}
+                    defaultActiveIndex={activeMobileTabIndex}
+                    onTabChange={handleMobileTabChange}
+                    className="w-full bg-neutral-800/90 backdrop-blur-lg border-neutral-700 shadow-xl"
+                    limelightColor="rgba(168, 85, 247, 0.7)"
+                    iconClassName="text-white group-hover:text-purple-300"
+                    iconContainerClassName="group"
+                />
+            </div>
+        );
+    }
+
+    // Regular sidebar for desktop
     return (
         <div className={cn(
             "flex flex-col transition-all duration-300 relative h-full",

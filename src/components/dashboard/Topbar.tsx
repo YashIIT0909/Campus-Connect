@@ -10,7 +10,8 @@ import {
     Plus,
     Settings,
     User,
-    ChevronDown
+    ChevronDown,
+    LogOut
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -36,10 +37,8 @@ export default function TopBar() {
                     <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-sm">
                         <span className="text-white font-bold text-sm">CC</span>
                     </div>
-                    <span className="text-lg font-semibold text-white">Campus Connect</span>
+                    <span className="text-lg font-semibold text-white hidden md:inline">Campus Connect</span>
                 </div>
-
-
             </div>
 
             {/* Right Section - Actions and User */}
@@ -62,14 +61,21 @@ export default function TopBar() {
                                     {user.name.split(' ').map(n => n[0]).join('')}
                                 </span>
                             </div>
-                            <div className="text-left">
+                            {/* Only show user info on desktop */}
+                            <div className="text-left hidden md:block">
                                 <div className="text-sm font-medium text-white">{user.name}</div>
                                 <div className="text-xs text-neutral-400">{user.email}</div>
                             </div>
-                            <ChevronDown className="w-4 h-4 text-neutral-400" />
+                            <ChevronDown className="w-4 h-4 text-neutral-400 hidden md:block" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56 bg-neutral-800 border-neutral-700">
+                    <DropdownMenuContent align="end" className="w-64 bg-neutral-800 border-neutral-700">
+                        {/* Show user info in dropdown on mobile */}
+                        <div className="md:hidden p-3">
+                            <div className="text-sm font-medium text-white">{user.name}</div>
+                            <div className="text-xs text-neutral-400">{user.email}</div>
+                        </div>
+                        <DropdownMenuSeparator className="md:hidden" />
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
@@ -82,6 +88,7 @@ export default function TopBar() {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
+                            <LogOut className="w-4 h-4 mr-2" />
                             Log out
                         </DropdownMenuItem>
                     </DropdownMenuContent>

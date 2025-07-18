@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BackgroundPaths } from '@/components/ui/background-paths';
 import Sidebar from '@/components/dashboard/Sidebar';
 import TopBar from '@/components/dashboard/Topbar';
 import PersonalDashboard from '@/components/dashboard/PersonalDashboard';
-// import AllItems from '@/components/dashboard/AllItems';
+import AllItems from '@/components/dashboard/AllItems';
 import MyPosts from '@/components/dashboard/MyPosts';
 import Analytics from '@/components/dashboard/Analytics';
 import Settings from '@/components/dashboard/Settings';
@@ -13,13 +13,29 @@ import Settings from '@/components/dashboard/Settings';
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('personal');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkIfMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        // Initial check
+        checkIfMobile();
+
+        // Add event listener
+        window.addEventListener('resize', checkIfMobile);
+
+        // Cleanup
+        return () => window.removeEventListener('resize', checkIfMobile);
+    }, []);
 
     const renderContent = () => {
         switch (activeTab) {
             case 'personal':
                 return <PersonalDashboard />;
-            // case 'all-items':
-            //     return <AllItems />;
+            case 'all-items':
+                return <AllItems />;
             case 'my-posts':
                 return <MyPosts />;
             case 'analytics':
@@ -48,18 +64,20 @@ export default function Dashboard() {
 
                     {/* Main Content Area - Full Width */}
                     <div className="flex gap-6 min-h-[calc(100vh-140px)] w-full">
-                        {/* Sidebar */}
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
-                            <Sidebar
-                                activeTab={activeTab}
-                                setActiveTab={setActiveTab}
-                                collapsed={sidebarCollapsed}
-                                setCollapsed={setSidebarCollapsed}
-                            />
-                        </div>
+                        {/* Sidebar - Hidden on Mobile */}
+                        {!isMobile && (
+                            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
+                                <Sidebar
+                                    activeTab={activeTab}
+                                    setActiveTab={setActiveTab}
+                                    collapsed={sidebarCollapsed}
+                                    setCollapsed={setSidebarCollapsed}
+                                />
+                            </div>
+                        )}
 
                         {/* Dashboard Content */}
-                        <main className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                        <main className={`flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ${isMobile ? 'pb-20' : ''}`}>
                             <div className="p-8 h-full overflow-auto">
                                 {renderContent()}
                             </div>
@@ -67,6 +85,16 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Navigation */}
+            {isMobile && (
+                <Sidebar
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    collapsed={true}
+                    setCollapsed={setSidebarCollapsed}
+                />
+            )}
         </div>
     );
 }
