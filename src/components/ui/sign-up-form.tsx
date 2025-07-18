@@ -1015,27 +1015,28 @@ export function SignUpForm() {
                                         {renderStepContent()}
                                     </AnimatePresence>
                                 </div>
+                                <motion.p
+                                    className="text-center text-xs text-white/60 mt-4"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                >
+                                    Already have an account?{' '}
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push('/sign-in')}
+                                        className="relative inline-block group/signin"
+                                    >
+                                        <span className="relative z-10 text-indigo-400 group-hover/signin:text-rose-400 transition-colors duration-300 font-medium">
+                                            Sign in
+                                        </span>
+                                        <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gradient-to-r from-indigo-400 to-rose-400 group-hover/signin:w-full transition-all duration-300" />
+                                    </button>
+                                </motion.p>
                             </form>
 
                             {/* Sign in link */}
-                            <motion.p
-                                className="text-center text-xs text-white/60 mt-4"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5 }}
-                            >
-                                Already have an account?{' '}
-                                <button
-                                    type="button"
-                                    onClick={() => router.push('/sign-in')}
-                                    className="relative inline-block group/signin"
-                                >
-                                    <span className="relative z-10 text-indigo-400 group-hover/signin:text-rose-400 transition-colors duration-300 font-medium">
-                                        Sign in
-                                    </span>
-                                    <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gradient-to-r from-indigo-400 to-rose-400 group-hover/signin:w-full transition-all duration-300" />
-                                </button>
-                            </motion.p>
+
                         </div>
                     </div>
                 </motion.div>

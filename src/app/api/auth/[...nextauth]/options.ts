@@ -148,6 +148,10 @@ const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt"
     },
+    pages: {
+        error: '/sign-up', // This redirects all auth errors to sign-up page
+        signIn: '/sign-in',
+    },
     secret: process.env.NEXTAUTH_SECRET,
 };
 

@@ -4,6 +4,8 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { Mail, Lock, Eye, EyeClosed, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
+import { signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     return (
@@ -27,6 +29,8 @@ export function SignInForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const { status } = useSession();
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 
 
@@ -50,16 +54,67 @@ export function SignInForm() {
         mouseY.set(0);
     };
 
-    const handleSubmit = (event: React.FormEvent) => {
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/dashboard');
+        }
+    }, [status, router]);
+
+    // Show loading state while checking auth
+    if (status === 'loading') {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setIsLoading(true);
-        // Simulate login process
-        setTimeout(() => {
+        setErrorMessage(null);
+
+        try {
+            const result = await signIn('credentials', {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setErrorMessage(result.error);
+                throw new Error(result.error);
+            }
+
+            // Success! Redirect to dashboard or home
+            router.push('/dashboard');
+        } catch (error: any) {
+            console.error('Authentication error:', error);
+
+            setErrorMessage(error.message || 'Authentication failed');
+        } finally {
             setIsLoading(false);
-            // Navigate back to home or dashboard
-            router.push('/');
-        }, 2000);
+        }
     };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            await signIn('google', { callbackUrl: '/dashboard' });
+        } catch (error) {
+            console.error('Google sign-in error:', error);
+        }
+    };
+
+    // Then update your Google button
+    <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        type="button"
+        onClick={handleGoogleSignIn}
+        className="w-full relative group/google"
+    >
+        {/* ...existing button content */}
+    </motion.button>
 
     const handleBackToHome = () => {
         router.push('/');
@@ -375,6 +430,7 @@ export function SignInForm() {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     type="button"
+                                    onClick={handleGoogleSignIn}
                                     className="w-full relative group/google"
                                 >
                                     <div className="absolute inset-0 bg-white/5 rounded-lg blur opacity-0 group-hover/google:opacity-70 transition-opacity duration-300" />
@@ -420,6 +476,15 @@ export function SignInForm() {
                                     </button>
                                 </motion.p>
                             </form>
+                            {errorMessage && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="text-rose-500 text-xs mt-1 text-center"
+                                >
+                                    {errorMessage}
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </motion.div>
