@@ -5,7 +5,7 @@ import { BackgroundPaths } from '@/components/ui/background-paths';
 import Sidebar from '@/components/dashboard/Sidebar';
 import TopBar from '@/components/dashboard/Topbar';
 import PersonalDashboard from '@/components/dashboard/PersonalDashboard';
-import AllItems from '@/components/dashboard/AllItems';
+// import AllItems from '@/components/dashboard/AllItems';
 import MyPosts from '@/components/dashboard/MyPosts';
 import Analytics from '@/components/dashboard/Analytics';
 import Settings from '@/components/dashboard/Settings';
@@ -18,8 +18,8 @@ export default function Dashboard() {
         switch (activeTab) {
             case 'personal':
                 return <PersonalDashboard />;
-            case 'all-items':
-                return <AllItems />;
+            // case 'all-items':
+            //     return <AllItems />;
             case 'my-posts':
                 return <MyPosts />;
             case 'analytics':
@@ -32,7 +32,7 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-neutral-950 relative overflow-hidden">
+        <div className="min-h-screen bg-neutral-950 relative overflow-hidden w-screen">
             {/* Background Paths */}
             <div className="absolute inset-0">
                 <BackgroundPaths />
