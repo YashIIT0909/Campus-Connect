@@ -11,7 +11,7 @@ export const hostelList = [
     "Ruby & Rosaline",
     "Emerald",
     "Opal",
-    "international"
+    "International"
 ] as const;
 
 export const usernameValidation = z

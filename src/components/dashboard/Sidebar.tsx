@@ -27,7 +27,6 @@ const menuItems = [
     { id: 'all-items', label: 'All Items', icon: Search },
     { id: 'my-posts', label: 'My Posts', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'community', label: 'Community', icon: Users },
 ];
 
 const generalItems = [
@@ -44,14 +43,16 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, setCollaps
         )}>
             {/* Toggle Button */}
             <div className="absolute -right-3 top-6 z-20">
-                <Button
-                    variant="outline"
-                    size="sm"
+                <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="w-6 h-6 p-0 bg-neutral-800 border-neutral-700 shadow-sm hover:bg-neutral-700 text-neutral-300"
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 shadow-md hover:bg-neutral-700 focus:outline-none"
                 >
-                    {collapsed ? <Menu className="w-3 h-3" /> : <X className="w-3 h-3" />}
-                </Button>
+                    {collapsed ? (
+                        <Menu className="h-4 w-4 text-neutral-300" />
+                    ) : (
+                        <X className="h-4 w-4 text-neutral-300" />
+                    )}
+                </button>
             </div>
 
             {/* Menu Label */}

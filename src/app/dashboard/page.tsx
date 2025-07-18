@@ -38,16 +38,16 @@ export default function Dashboard() {
                 <BackgroundPaths />
             </div>
 
-            {/* Dashboard Container */}
-            <div className="relative z-10 p-6">
-                <div className="max-w-[1400px] mx-auto space-y-6">
-                    {/* Top Bar */}
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
+            {/* Dashboard Container - Full Width */}
+            <div className="relative z-10 p-6 w-full">
+                <div className="w-full space-y-6">
+                    {/* Top Bar - Full Width */}
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl w-full">
                         <TopBar />
                     </div>
 
-                    {/* Main Content Area */}
-                    <div className="flex gap-6 min-h-[calc(100vh-140px)]">
+                    {/* Main Content Area - Full Width */}
+                    <div className="flex gap-6 min-h-[calc(100vh-140px)] w-full">
                         {/* Sidebar */}
                         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl">
                             <Sidebar
