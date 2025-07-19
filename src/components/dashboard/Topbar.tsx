@@ -100,7 +100,7 @@ export default function TopBar() {
                                 <div className="text-sm font-medium text-white">{user.name}</div>
                                 <div className="text-xs text-neutral-400">{user.email}</div>
                             </div>
-                            <ChevronDown className="w-4 h-4 text-neutral-400 hidden md:block" />
+                            <ChevronDown className="w-4 h-4 text-neutral-400  md:block" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-64 bg-neutral-800 border-neutral-700">
@@ -109,19 +109,19 @@ export default function TopBar() {
                             <div className="text-sm font-medium text-white">{user.name}</div>
                             <div className="text-xs text-neutral-400">{user.email}</div>
                         </div>
-                        <DropdownMenuSeparator className="md:hidden" />
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuSeparator className="md:hidden border-neutral-700" />
+                        <DropdownMenuLabel className="text-white">My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator className="border-neutral-700" />
+                        <DropdownMenuItem className="text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-700 focus:bg-neutral-700 cursor-pointer">
                             <User className="w-4 h-4 mr-2" />
                             Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem className="text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-700 focus:bg-neutral-700 cursor-pointer">
                             <Settings className="w-4 h-4 mr-2" />
                             Settings
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuSeparator className="border-neutral-700" />
+                        <DropdownMenuItem className="text-neutral-200 hover:text-white focus:text-white hover:bg-neutral-700 focus:bg-neutral-700 cursor-pointer">
                             <LogOut className="w-4 h-4 mr-2" />
                             Log out
                         </DropdownMenuItem>
