@@ -72,7 +72,7 @@ export const LimelightNav = ({
         setActiveIndex(index);
         onTabChange?.(index);
         itemOnClick?.();
-    };
+    }
 
     return (
         <nav className={`relative inline-flex items-center h-16 rounded-lg bg-card text-foreground justify-center border px-2 ${className}`}>

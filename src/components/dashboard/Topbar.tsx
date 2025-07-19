@@ -21,13 +21,28 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import AvatarPicker from './AvatarPicker';
 
 export default function TopBar() {
-    const [user] = useState({
+    const [user, setUser] = useState({
         name: 'Alex Johnson',
         email: 'alex.johnson@university.edu',
-        avatar: '/api/placeholder/40/40'
+        avatar: {
+            id: 1,
+            url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
+        }
     });
+
+    const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
+    const userInitials = user.name.split(' ').map(n => n[0]).join('');
+
+    const handleAvatarSelect = (selectedAvatar: { id: number, url: string }) => {
+        setUser({
+            ...user,
+            avatar: selectedAvatar
+        });
+        setIsAvatarPickerOpen(false);
+    };
 
     return (
         <div className="h-16 flex items-center justify-between px-6">
@@ -52,15 +67,34 @@ export default function TopBar() {
                     </Button>
                 </div>
 
+
+                <div
+                    className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shadow-sm cursor-pointer"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsAvatarPickerOpen(true);
+                    }}
+                >
+                    {user.avatar.url ? (
+                        <img
+                            src={user.avatar.url}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <span className="text-white font-medium text-sm">
+                            {userInitials}
+                        </span>
+                    )}
+                </div>
+
+
                 {/* User Dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="flex items-center gap-3 p-2 hover:bg-neutral-800/50">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center shadow-sm">
-                                <span className="text-white font-medium text-sm">
-                                    {user.name.split(' ').map(n => n[0]).join('')}
-                                </span>
-                            </div>
+                            {/* Use a separate div that wraps the avatar to handle the avatar picker */}
+
                             {/* Only show user info on desktop */}
                             <div className="text-left hidden md:block">
                                 <div className="text-sm font-medium text-white">{user.name}</div>
@@ -94,6 +128,14 @@ export default function TopBar() {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
+            {/* Avatar Picker Modal */}
+            <AvatarPicker
+                isOpen={isAvatarPickerOpen}
+                onClose={() => setIsAvatarPickerOpen(false)}
+                onSelect={handleAvatarSelect}
+                currentInitials={userInitials}
+            />
         </div>
     );
 }

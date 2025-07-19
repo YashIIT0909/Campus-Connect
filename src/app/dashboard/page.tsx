@@ -77,7 +77,7 @@ export default function Dashboard() {
                         )}
 
                         {/* Dashboard Content */}
-                        <main className={`flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ${isMobile ? 'pb-20' : ''}`}>
+                        <main className={`flex-1 z-0 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden ${isMobile ? 'pb-20' : ''}`}>
                             <div className="p-8 h-full overflow-auto">
                                 {renderContent()}
                             </div>

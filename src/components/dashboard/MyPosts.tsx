@@ -44,8 +44,8 @@ export default function MyPosts() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800">My Posts</h1>
-                    <p className="text-slate-500">Manage your lost and found item listings</p>
+                    <h1 className="text-2xl font-bold text-white">My Posts</h1>
+                    <p className="text-white/70">Manage your lost and found item listings</p>
                 </div>
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                     <Plus className="w-4 h-4 mr-2" />
@@ -55,46 +55,46 @@ export default function MyPosts() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-white border-slate-200 shadow-sm">
+                <Card className="bg-emerald-600/20 backdrop-blur-sm border border-emerald-500/30 shadow-xl">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-slate-500">Total Posts</p>
-                                <p className="text-2xl font-bold text-slate-800">{posts.length}</p>
+                                <p className="text-sm font-medium text-emerald-200">Total Posts</p>
+                                <p className="text-2xl font-bold text-white">{posts.length}</p>
                             </div>
-                            <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center">
+                            <div className="w-12 h-12 bg-emerald-600/80 rounded-xl flex items-center justify-center">
                                 <Plus className="w-6 h-6 text-white" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white border-slate-200 shadow-sm">
+                <Card className="bg-red-600/20 backdrop-blur-sm border border-red-500/30 shadow-xl">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-slate-500">Lost Items</p>
-                                <p className="text-2xl font-bold text-slate-800">
+                                <p className="text-sm font-medium text-red-200">Lost Items</p>
+                                <p className="text-2xl font-bold text-white">
                                     {posts.filter(p => p.status === 'lost').length}
                                 </p>
                             </div>
-                            <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center">
+                            <div className="w-12 h-12 bg-red-600/80 rounded-xl flex items-center justify-center">
                                 <Eye className="w-6 h-6 text-white" />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white border-slate-200 shadow-sm">
+                <Card className="bg-blue-600/20 backdrop-blur-sm border border-blue-500/30 shadow-xl">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-slate-500">Found Items</p>
-                                <p className="text-2xl font-bold text-slate-800">
+                                <p className="text-sm font-medium text-blue-200">Found Items</p>
+                                <p className="text-2xl font-bold text-white">
                                     {posts.filter(p => p.status === 'found').length}
                                 </p>
                             </div>
-                            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                            <div className="w-12 h-12 bg-blue-600/80 rounded-xl flex items-center justify-center">
                                 <Eye className="w-6 h-6 text-white" />
                             </div>
                         </div>
