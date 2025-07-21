@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { hostelList, signUpValidation } from "@/schema/signUpSchema";
 import axios from 'axios';
 import { signIn } from "next-auth/react";
+import { useDebounceCallback } from 'usehooks-ts'
 
 
 // Re-using the Input component from your SignInForm - MODIFIED FOR FLOATING LABEL
@@ -58,7 +59,6 @@ export function SignUpForm() {
 
     // Form Data States
     const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -67,6 +67,28 @@ export function SignUpForm() {
 
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+
+
+    const [username, setUsername] = useState("");
+    const [usernameMessage, setUsernameMessage] = useState("");
+    const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+    const debouncedUsername = useDebounceCallback(setUsername, 500);
+
+    const [emailMessage, setEmailMessage] = useState("");
+    const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+    const debouncedEmail = useDebounceCallback((value) => {
+        setEmail(value);
+    }, 500);
+
+    const isStep1Valid = () => {
+        // Username must be entered and valid (availability message includes "available")
+        const isUsernameValid = firstName && usernameMessage.includes("available");
+
+        // Email must be entered and valid (availability message includes "available")
+        const isEmailValid = email && emailMessage.includes("available");
+
+        return isUsernameValid && isEmailValid;
+    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -136,6 +158,60 @@ export function SignUpForm() {
     const handlePreviousStep = () => {
         setStep((prev) => prev - 1);
     };
+
+    useEffect(() => {
+        const checkUsernameUnique = async () => {
+            if (username) {
+
+                setIsCheckingUsername(true);
+                setUsernameMessage("");
+
+                try {
+
+                    const response = await axios.get(`/api/auth/check-username?username=${username}`);
+
+                    setUsernameMessage(response.data.message);
+
+                } catch (error: any) {
+                    if (error.response?.data?.message) {
+                        setUsernameMessage(error.response.data.message);
+                    } else {
+                        setUsernameMessage("Error checking username");
+                    }
+                } finally {
+                    setIsCheckingUsername(false);
+                }
+
+            }
+
+        }
+
+        checkUsernameUnique();
+    }, [username])
+    useEffect(() => {
+        const checkEmailUnique = async () => {
+            if (email) {
+                setIsCheckingEmail(true);
+                setEmailMessage("");
+
+                try {
+                    const response = await axios.get(`/api/auth/check-email?email=${email}`);
+                    setEmailMessage(response.data.message);
+                } catch (error: any) {
+                    // Display specific error message if available
+                    if (error.response?.data?.message) {
+                        setEmailMessage(error.response.data.message);
+                    } else {
+                        setEmailMessage("Error checking email");
+                    }
+                } finally {
+                    setIsCheckingEmail(false);
+                }
+            }
+        };
+
+        checkEmailUnique();
+    }, [email]);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -292,7 +368,10 @@ export function SignUpForm() {
                                     type="text"
                                     placeholder="Username*"
                                     value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    onChange={(e) => {
+                                        setFirstName(e.target.value);
+                                        debouncedUsername(e.target.value); // Add this line to update the username state
+                                    }}
                                     onFocus={() => setFocusedInput("firstName")}
                                     onBlur={() => setFocusedInput(null)}
                                     // FIX: Ensure no conflicting background color on focus
@@ -324,6 +403,41 @@ export function SignUpForm() {
                                     />
                                 )}
                             </div>
+
+                            {/* Username availability message */}
+                            <AnimatePresence>
+                                {(firstName && (isCheckingUsername || usernameMessage)) && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -5 }}
+                                        className="mt-1 text-xs flex items-center h-5 pl-2"
+                                    >
+                                        {isCheckingUsername ? (
+                                            <div className="flex items-center text-white/60">
+                                                <div className="w-3 h-3 mr-2 border-t-2 border-indigo-400 border-r-2 rounded-full animate-spin" />
+                                                Checking username...
+                                            </div>
+                                        ) : (
+                                            <div className={`flex items-center ${usernameMessage.includes("available") ? "text-green-400" : "text-rose-400"}`}>
+                                                {usernameMessage.includes("available") ? (
+                                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                                ) : (
+                                                    <motion.div
+                                                        initial={{ rotate: 0 }}
+                                                        animate={{ rotate: [0, 5, -5, 0] }}
+                                                        transition={{ duration: 0.5 }}
+                                                        className="text-rose-400 mr-1"
+                                                    >
+                                                        ✕
+                                                    </motion.div>
+                                                )}
+                                                {usernameMessage}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
 
                         {/* Last Name Input with Floating Label */}
@@ -343,7 +457,10 @@ export function SignUpForm() {
                                     type="email"
                                     placeholder="Email*"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        debouncedEmail(e.target.value);
+                                    }}
                                     onFocus={() => setFocusedInput("email")}
                                     onBlur={() => setFocusedInput(null)}
                                     // FIX: Ensure no conflicting background color on focus
@@ -375,20 +492,55 @@ export function SignUpForm() {
                                     />
                                 )}
                             </div>
+                            {/* Email availability message */}
+                            <AnimatePresence>
+                                {(email && (isCheckingEmail || emailMessage)) && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -5 }}
+                                        className="mt-1 text-xs flex items-center h-5 pl-2"
+                                    >
+                                        {isCheckingEmail ? (
+                                            <div className="flex items-center text-white/60">
+                                                <div className="w-3 h-3 mr-2 border-t-2 border-indigo-400 border-r-2 rounded-full animate-spin" />
+                                                Checking email...
+                                            </div>
+                                        ) : (
+                                            <div className={`flex items-center ${emailMessage.includes("available") ? "text-green-400" : "text-rose-400"}`}>
+                                                {emailMessage.includes("available") ? (
+                                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                                ) : (
+                                                    <motion.div
+                                                        initial={{ rotate: 0 }}
+                                                        animate={{ rotate: [0, 5, -5, 0] }}
+                                                        transition={{ duration: 0.5 }}
+                                                        className="text-rose-400 mr-1"
+                                                    >
+                                                        ✕
+                                                    </motion.div>
+                                                )}
+                                                {emailMessage}
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
 
                         <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ scale: isStep1Valid() ? 1.02 : 1 }}
+                            whileTap={{ scale: isStep1Valid() ? 0.98 : 1 }}
                             type="button"
                             onClick={handleNextStep}
-                            className="w-full relative group/button mt-5"
+                            disabled={!isStep1Valid()}
+                            className={`w-full relative group/button mt-5 ${!isStep1Valid() ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-rose-500/20 rounded-lg blur-lg opacity-0 group-hover/button:opacity-70 transition-opacity duration-300" />
+                            <div className={`absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-rose-500/20 rounded-lg blur-lg opacity-0 ${isStep1Valid() ? 'group-hover/button:opacity-70' : ''} transition-opacity duration-300`} />
                             <div className="relative overflow-hidden bg-gradient-to-r from-indigo-500 to-rose-500 text-white font-medium h-10 rounded-lg transition-all duration-300 flex items-center justify-center">
                                 <span className="flex items-center justify-center gap-1 text-sm font-medium">
                                     Continue
-                                    <ArrowRight className="w-3 h-3 group-hover/button:translate-x-1 transition-transform duration-300" />
+                                    <ArrowRight className={`w-3 h-3 ${isStep1Valid() ? 'group-hover/button:translate-x-1' : ''} transition-transform duration-300`} />
                                 </span>
                             </div>
                         </motion.button>

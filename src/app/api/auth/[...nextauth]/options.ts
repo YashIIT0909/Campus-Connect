@@ -146,7 +146,8 @@ const authOptions: NextAuthOptions = {
         }
     },
     session: {
-        strategy: "jwt"
+        strategy: "jwt",
+        maxAge: 86400
     },
     pages: {
         error: '/sign-up', // This redirects all auth errors to sign-up page
