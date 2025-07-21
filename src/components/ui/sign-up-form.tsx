@@ -80,6 +80,25 @@ export function SignUpForm() {
         setEmail(value);
     }, 500);
 
+    const checkPasswordRequirements = () => {
+        return {
+            length: password.length >= 8,
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[\W_]/.test(password)
+        };
+    };
+    const doPasswordsMatch = () => {
+        return password === confirmPassword && confirmPassword.length > 0;
+    };
+
+    // Add this function to check if all requirements are met
+    const isPasswordValid = () => {
+        const requirements = checkPasswordRequirements();
+        return Object.values(requirements).every(Boolean);
+    };
+
     const isStep1Valid = () => {
         // Username must be entered and valid (availability message includes "available")
         const isUsernameValid = firstName && usernameMessage.includes("available");
@@ -88,6 +107,15 @@ export function SignUpForm() {
         const isEmailValid = email && emailMessage.includes("available");
 
         return isUsernameValid && isEmailValid;
+    };
+    const isStep2Valid = () => {
+        // Password must be valid (meet all requirements)
+        const passwordMeetsRequirements = isPasswordValid();
+
+        // Confirm password must match password
+        const passwordsMatch = doPasswordsMatch();
+
+        return passwordMeetsRequirements && passwordsMatch;
     };
 
     useEffect(() => {
@@ -574,7 +602,10 @@ export function SignUpForm() {
                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         >
                             <div className="relative flex items-center overflow-hidden rounded-lg">
-                                <Lock className={`absolute left-3 w-4 h-4 transition-all duration-300 ${focusedInput === "password" ? 'text-rose-400' : 'text-white/40'}`} />
+                                <Lock className={`absolute left-3 w-4 h-4 transition-all duration-300 ${focusedInput === "password"
+                                    ? isPasswordValid() ? 'text-green-400' : 'text-rose-400'
+                                    : 'text-white/40'
+                                    }`} />
                                 <Input
                                     id="password"
                                     type={showPassword ? "text" : "password"}
@@ -583,19 +614,24 @@ export function SignUpForm() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     onFocus={() => setFocusedInput("password")}
                                     onBlur={() => setFocusedInput(null)}
-                                    // FIX: Ensure no conflicting background color on focus
-                                    className="w-full bg-black/60 border-white/10 focus:border-rose-400/50 text-white h-10 transition-all duration-300 pl-10 pr-10"
+                                    className={`w-full bg-black/60 border-white/10 ${focusedInput === "password"
+                                        ? isPasswordValid()
+                                            ? 'focus:border-green-400/50'
+                                            : 'focus:border-rose-400/50'
+                                        : 'focus:border-rose-400/50'
+                                        } text-white h-10 transition-all duration-300 pl-10 pr-10`}
                                     required
                                 />
                                 <motion.label
                                     htmlFor="password"
-                                    // FIX: Add z-10 to lift label, and bg-black/60 to hide border behind it
                                     className="absolute left-10 cursor-text text-white/30 transition-all duration-300 ease-in-out pointer-events-none bg-black/60 px-1 z-10"
                                     animate={{
                                         y: focusedInput === "password" || password ? -18 : 0,
                                         x: focusedInput === "password" || password ? -24 : 0,
                                         scale: focusedInput === "password" || password ? 0.75 : 1,
-                                        color: focusedInput === "password" ? "rgba(244,63,94,1)" : (password ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)")
+                                        color: focusedInput === "password"
+                                            ? isPasswordValid() ? "rgba(74,222,128,1)" : "rgba(244,63,94,1)"
+                                            : (password ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)")
                                     }}
                                     transition={{ duration: 0.2 }}
                                 >
@@ -615,7 +651,7 @@ export function SignUpForm() {
                                 {focusedInput === "password" && (
                                     <motion.div
                                         layoutId="input-highlight"
-                                        className="absolute inset-0 bg-rose-500/10 -z-10 rounded-lg"
+                                        className={`absolute inset-0 ${isPasswordValid() ? 'bg-green-500/10' : 'bg-rose-500/10'} -z-10 rounded-lg`}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
@@ -623,6 +659,39 @@ export function SignUpForm() {
                                     />
                                 )}
                             </div>
+                        </motion.div>
+
+                        {/* Password requirements */}
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{
+                                opacity: password.length > 0 || focusedInput === "password" ? 1 : 0.7,
+                                height: "auto"
+                            }}
+                            transition={{ duration: 0.3 }}
+                            className="mt-2 text-xs px-2 space-y-1 text-white/60"
+                        >
+                            <h4 className="font-medium mb-1">Password requirements:</h4>
+                            <ul className="space-y-1 pl-1">
+                                {Object.entries(checkPasswordRequirements()).map(([key, isMet]) => (
+                                    <motion.li
+                                        key={key}
+                                        className={`flex items-center gap-1.5 ${isMet ? 'text-green-400' : ''}`}
+                                        animate={{ color: isMet ? 'rgb(74 222 128)' : 'rgba(255, 255, 255, 0.6)' }}
+                                    >
+                                        {isMet ? (
+                                            <CheckCircle className="w-3 h-3 flex-shrink-0" />
+                                        ) : (
+                                            <div className="w-3 h-3 rounded-full border border-white/40 flex-shrink-0" />
+                                        )}
+                                        {key === 'length' && 'At least 8 characters long'}
+                                        {key === 'lowercase' && 'At least one lowercase letter (a-z)'}
+                                        {key === 'uppercase' && 'At least one uppercase letter (A-Z)'}
+                                        {key === 'number' && 'At least one number (0-9)'}
+                                        {key === 'special' && 'At least one special character (!@#$%^&*...)'}
+                                    </motion.li>
+                                ))}
+                            </ul>
                         </motion.div>
 
                         {/* Confirm Password input with Floating Label */}
@@ -633,7 +702,10 @@ export function SignUpForm() {
                             transition={{ type: "spring", stiffness: 400, damping: 25 }}
                         >
                             <div className="relative flex items-center overflow-hidden rounded-lg">
-                                <Lock className={`absolute left-3 w-4 h-4 transition-all duration-300 ${focusedInput === "confirmPassword" ? 'text-rose-400' : 'text-white/40'}`} />
+                                <Lock className={`absolute left-3 w-4 h-4 transition-all duration-300 ${focusedInput === "confirmPassword"
+                                    ? doPasswordsMatch() ? 'text-green-400' : 'text-rose-400'
+                                    : 'text-white/40'
+                                    }`} />
                                 <Input
                                     id="confirmPassword"
                                     type={showPassword ? "text" : "password"}
@@ -642,19 +714,24 @@ export function SignUpForm() {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     onFocus={() => setFocusedInput("confirmPassword")}
                                     onBlur={() => setFocusedInput(null)}
-                                    // FIX: Ensure no conflicting background color on focus
-                                    className="w-full bg-black/60 border-white/10 focus:border-rose-400/50 text-white h-10 transition-all duration-300 pl-10 pr-10"
+                                    className={`w-full bg-black/60 border-white/10 ${focusedInput === "confirmPassword"
+                                        ? doPasswordsMatch()
+                                            ? 'focus:border-green-400/50'
+                                            : 'focus:border-rose-400/50'
+                                        : 'focus:border-rose-400/50'
+                                        } text-white h-10 transition-all duration-300 pl-10 pr-10`}
                                     required
                                 />
                                 <motion.label
                                     htmlFor="confirmPassword"
-                                    // FIX: Add z-10 to lift label, and bg-black/60 to hide border behind it
                                     className="absolute left-10 cursor-text text-white/30 transition-all duration-300 ease-in-out pointer-events-none bg-black/60 px-1 z-10"
                                     animate={{
                                         y: focusedInput === "confirmPassword" || confirmPassword ? -18 : 0,
                                         x: focusedInput === "confirmPassword" || confirmPassword ? -24 : 0,
                                         scale: focusedInput === "confirmPassword" || confirmPassword ? 0.75 : 1,
-                                        color: focusedInput === "confirmPassword" ? "rgba(244,63,94,1)" : (confirmPassword ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)")
+                                        color: focusedInput === "confirmPassword"
+                                            ? doPasswordsMatch() ? "rgba(74,222,128,1)" : "rgba(244,63,94,1)"
+                                            : (confirmPassword ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)")
                                     }}
                                     transition={{ duration: 0.2 }}
                                 >
@@ -674,7 +751,7 @@ export function SignUpForm() {
                                 {focusedInput === "confirmPassword" && (
                                     <motion.div
                                         layoutId="input-highlight"
-                                        className="absolute inset-0 bg-rose-500/10 -z-10 rounded-lg"
+                                        className={`absolute inset-0 ${doPasswordsMatch() ? 'bg-green-500/10' : 'bg-rose-500/10'} -z-10 rounded-lg`}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
@@ -682,6 +759,39 @@ export function SignUpForm() {
                                     />
                                 )}
                             </div>
+
+                            {/* Password match indicator */}
+                            <AnimatePresence>
+                                {confirmPassword.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -5 }}
+                                        className="mt-1 text-xs flex items-center h-5 pl-2"
+                                    >
+                                        <div className={`flex items-center ${doPasswordsMatch() ? "text-green-400" : "text-rose-400"}`}>
+                                            {doPasswordsMatch() ? (
+                                                <>
+                                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                                    Passwords match
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <motion.div
+                                                        initial={{ rotate: 0 }}
+                                                        animate={{ rotate: [0, 5, -5, 0] }}
+                                                        transition={{ duration: 0.5 }}
+                                                        className="text-rose-400 mr-1"
+                                                    >
+                                                        ✕
+                                                    </motion.div>
+                                                    Passwords don't match
+                                                </>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
 
                         <div className="flex justify-between gap-2 mt-5">
@@ -699,17 +809,18 @@ export function SignUpForm() {
                                 </div>
                             </motion.button>
                             <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{ scale: isStep2Valid() ? 1.02 : 1 }}
+                                whileTap={{ scale: isStep2Valid() ? 0.98 : 1 }}
                                 type="button"
                                 onClick={handleNextStep}
-                                className="w-full relative group/button"
+                                disabled={!isStep2Valid()}
+                                className={`w-full relative group/button ${!isStep2Valid() ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-rose-500/20 rounded-lg blur-lg opacity-0 group-hover/button:opacity-70 transition-opacity duration-300" />
+                                <div className={`absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-rose-500/20 rounded-lg blur-lg opacity-0 ${isStep2Valid() ? 'group-hover/button:opacity-70' : ''} transition-opacity duration-300`} />
                                 <div className="relative overflow-hidden bg-gradient-to-r from-indigo-500 to-rose-500 text-white font-medium h-10 rounded-lg transition-all duration-300 flex items-center justify-center">
                                     <span className="flex items-center justify-center gap-1 text-sm font-medium">
                                         Continue
-                                        <ArrowRight className="w-3 h-3 group-hover/button:translate-x-1 transition-transform duration-300" />
+                                        <ArrowRight className={`w-3 h-3 ${isStep2Valid() ? 'group-hover/button:translate-x-1' : ''} transition-transform duration-300`} />
                                     </span>
                                 </div>
                             </motion.button>
